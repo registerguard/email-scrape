@@ -54,7 +54,7 @@ def write_file(c, h):
 
 
 def get_url(url):
-    url = "http://{}".format(url)
+    url = "//{}".format(url)
     return url
 
 
@@ -137,7 +137,9 @@ cb_html = analyze_chartbeat(cb)
 cv = get_civil()
 cv_html = analyze_civil(cv)
 
-code = u"{0}\n{1}".format(cb_html, cv_html)
+utf = "<meta charset='utf-8'>"
+
+code = u"{0}\n{1}\n{2}".format(utf, cb_html, cv_html)
 code = code.encode('utf-8')
 
 write_file(code,here)
