@@ -36,7 +36,7 @@ pp = pprint.PrettyPrinter(indent=4)
  --- SET TO TRUE IF TESTING, FALSE BEFORE YOU PUSH TO GITHUB/WAVE ---
 """
 
-dev = True
+dev = False
 
 if (dev == True):
     here = os.path.abspath('.')
