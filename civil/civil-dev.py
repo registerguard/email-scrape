@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[50]:
+# In[68]:
 
 
 """
@@ -21,7 +21,7 @@ TODO
 import requests, json, boto3, os, sys, logging, logging.handlers
 
 
-# In[51]:
+# In[69]:
 
 
 """
@@ -38,39 +38,7 @@ else:
     here = "/".join(here)
 
 
-# In[52]:
-
-
-"""
-
-write_file() - Write file locally and to S3
-
-Requirements:
- - Global `here` variable that knows where project root is.
-
-Arguments:
- - contents: The long string you want to insert as the contents of the file
-
-Example: 
- - write_file(html)
-
-"""
-
-
-def write_file(contents):
-    f = open('{0}/html/index.html'.format(here), 'w+')
-    f.write(contents)
-    f.close()
-    # Write to s3 (Comment out when testing)
-    """
-    # See: https://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.upload_file
-    s3 = boto3.resource('s3')
-    # *** COMMENT OUT FOR DEV ***
-    s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/popular/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
-    """
-
-
-# In[53]:
+# In[70]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -99,7 +67,40 @@ logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
 
 
-# In[54]:
+# In[71]:
+
+
+"""
+
+write_file() - Write file locally and to S3
+
+Requirements:
+ - Global `here` variable that knows where project root is.
+
+Arguments:
+ - contents: The long string you want to insert as the contents of the file
+
+Example: 
+ - write_file(html)
+
+"""
+
+
+def write_file(contents):
+    f = open('{0}/html/index.html'.format(here), 'w+')
+    logger.error
+    f.write(contents)
+    f.close()
+    # Write to s3 (Comment out when testing)
+    #"""
+    # See: https://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.upload_file
+    s3 = boto3.resource('s3')
+    # *** COMMENT OUT FOR DEV ***
+    s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/civil/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
+    #"""
+
+
+# In[72]:
 
 
 def get_url(url):
@@ -107,7 +108,7 @@ def get_url(url):
     return url
 
 
-# In[55]:
+# In[73]:
 
 
 def get_civil():
@@ -127,7 +128,7 @@ def get_civil():
     return cv_json
 
 
-# In[56]:
+# In[74]:
 
 
 def analyze_civil(cv_json):
@@ -139,11 +140,11 @@ def analyze_civil(cv_json):
         url = get_url(i['url'])
         title = i['title']
         comments = i['comments_count']
-        html += u"\t<h3><a href='{0}' target='_blank'>{1} ({2} comments)</a></h3>\n".format(url, title, comments)
+        html += u"<h3><a href='{0}' target='_blank'>{1} ({2} comments)</a></h3>\n".format(url, title, comments)
     return html
 
 
-# In[57]:
+# In[75]:
 
 
 cv = get_civil()
@@ -151,7 +152,7 @@ cv_html = analyze_civil(cv)
 #print(cv_html)
 
 
-# In[58]:
+# In[76]:
 
 
 code = u"{}".format(cv_html)
