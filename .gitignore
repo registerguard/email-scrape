@@ -1,4 +1,7 @@
-html/index.html
+**/html/index.html
 secrets.json
-*.ipynb
-.ipynb_checkpoints/**
+*/secrets.json
+chartbeat-dev.ipynb
+civil-dev.ipynb
+combined-dev.ipynb
+**/.ipynb_checkpoints/**
