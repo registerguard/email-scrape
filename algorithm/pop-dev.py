@@ -1,22 +1,42 @@
 
 # coding: utf-8
 
-# In[188]:
+# In[75]:
+
+
+"""
+
+GET RECENT, POPULAR STORIES
+ - Queries DT and Chartbeat and creates list of 
+   ... most popular stories published since 6 a.m.
+
+CREATED
+ - 8/14/17
+ - Rob Denton/The Register-Guard
+
+TODO
+ - Add logging
+ - Re-organize file structure
+
+"""
+
+
+# In[76]:
 
 
 from datetime import datetime
-import boto3, requests, os, sys, json, pprint, re
+import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers
 pp = pprint.PrettyPrinter(indent=4)
 
 
-# In[189]:
+# In[77]:
 
 
 """
  --- SET TO TRUE IF TESTING, FALSE BEFORE YOU PUSH TO GITHUB/WAVE ---
 """
 
-dev = False
+dev = True
 
 if (dev == True):
     here = os.path.abspath('.')
@@ -26,7 +46,36 @@ else:
     here = "/".join(here)
 
 
-# In[190]:
+# In[78]:
+
+
+# ----------------------------------------------------------------------------------------
+# LOGGING INITIALIZATION
+# ----------------------------------------------------------------------------------------
+
+logger = logging.getLogger('logger')
+# set level
+#logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
+
+# set vars
+log_file_dir = "{}/".format(here)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+fileLogger = logging.handlers.RotatingFileHandler(filename=("{0}pop.log".format(log_file_dir)), maxBytes=256*1024, backupCount=5) # 256 x 1024 = 256K
+fileLogger.setFormatter(formatter)
+logger.addHandler(fileLogger)
+
+# Uncomment below to print to console
+#handler = logging.StreamHandler()
+#handler.setFormatter(formatter)
+#logger.addHandler(handler)
+
+logger.debug("------------------")
+logger.debug(" - ENTER - ENTER -")
+logger.debug("vvvvvvvvvvvvvvvvvv")
+
+
+# In[79]:
 
 
 """
@@ -56,7 +105,7 @@ def get_secret(service, token='null'):
         return secret
 
 
-# In[191]:
+# In[80]:
 
 
 """
@@ -94,7 +143,7 @@ def write_file(contents):
 
 
 
-# In[192]:
+# In[81]:
 
 
 # Get clean datetime object from timestamp string
@@ -104,7 +153,7 @@ def clean_time(timestamp):
     return timestamp
 
 
-# In[193]:
+# In[82]:
 
 
 # Build dictionary of stories with CMS ID as key & dictionary of other data (like timestamp) as value
@@ -125,7 +174,7 @@ def id_stories(j):
     return stories
 
 
-# In[194]:
+# In[83]:
 
 
 """
@@ -154,12 +203,17 @@ def get_stories(section='local',area='Updates',publication='rg',items=None,callb
     if (callback):
         payload['callback'] = callback
     # Make request
-    r = requests.get(url, params = payload)
-    d = r.text
-    j = json.loads(d)
-    #print(json.dumps(j, sort_keys=True, indent=4, separators=(',', ': ')))
-    # Go build dictionary
-    stories = id_stories(j)
+    try:
+        r = requests.get(url, params = payload)
+    except:
+        stories = None
+        logger.error("REQUEST FAILED - {0}: {1}".format(url, payload))
+    if (len(r.text)):
+        d = r.text
+        j = json.loads(d)
+        #print(json.dumps(j, sort_keys=True, indent=4, separators=(',', ': ')))
+        # Go build dictionary
+        stories = id_stories(j)
     return stories
 
 local = get_stories('local','Top Stories,Updates')
@@ -170,6 +224,8 @@ dt = {}
 dt.update(local)
 dt.update(sports)
 
+logger.debug("dt set")
+
 
 # In[ ]:
 
@@ -177,7 +233,7 @@ dt.update(sports)
 
 
 
-# In[195]:
+# In[84]:
 
 
 # Make sure URL is clean and does not have protocol
@@ -186,41 +242,7 @@ def get_url(url):
     return url
 
 
-# In[196]:
-
-
-"""
- --- NOT NEEDED BECAUSE WE'LL GET HEADLINE FROM UPDATES ---
-"""
-# Clean headlines
-#  - Chartbeat will trim headlines at 100 characters
-def check_length(title):
-    if (len(title) == 100):
-        # Split on spaces and remove last word fragment
-        t = title.split(" ")[:-1]
-        # Put humpty dumpty back together
-        t = " ".join(t)
-        # Add ellipsis
-        title = u"{} \u2026".format(t)
-        return title
-
-
-# In[197]:
-
-
-"""
- --- NOT NEEDED BECAUSE WE'LL GET HEADLINE FROM UPDATES ---
-"""
-# Clean headlines
-#  - Chartbeat pulls page titles so headlines need to have pipes removed
-def clean_title(title):
-    title = title.split(" | ")
-    title = title[0]
-    check_length(title)
-    return title
-
-
-# In[198]:
+# In[85]:
 
 
 # Get CMS ID from URL
@@ -234,7 +256,7 @@ def get_id(url):
     return cms_id
 
 
-# In[199]:
+# In[86]:
 
 
 # Get Chartbeat stories
@@ -258,7 +280,8 @@ def get_cb_stories(cb_json, count=30):
                     try:
                         cms_id = get_id(url)
                     except:
-                        print("ERROR: Not a proper registerguard.com url\n --- URL: {}".format(url))
+                        most = None
+                        logger.error("ERROR: Not a proper registerguard.com url\n --- URL: {}".format(url))
                     # Check to see if you could get the CMS ID
                     if (len(cms_id)):
                         # Set CMS ID to URL
@@ -267,7 +290,7 @@ def get_cb_stories(cb_json, count=30):
     return most
 
 
-# In[200]:
+# In[87]:
 
 
 # Go out to Chartbeat API and get most popular stories right now
@@ -280,18 +303,24 @@ def get_chartbeat():
     limit = 50
     payload = { 'apikey': apikey, 'host': domain, 'types': types, 'limit': limit }
     # Make request
-    r = requests.get(url, params=payload)
-    cb_text = r.text
-    cb_json = json.loads(cb_text)
-    most = get_cb_stories(cb_json)
+    try:
+        r = requests.get(url, params=payload)
+    except:
+        most = None
+        logger.error("REQUEST FAILED - {0}: {1}".format(url, payload))
+    if (len(r.text)):
+        cb_text = r.text
+        cb_json = json.loads(cb_text)
+        most = get_cb_stories(cb_json)
     return most
 
 
-# In[201]:
+# In[88]:
 
 
 # Set cb to Chartbeat dictionary
 cb = get_chartbeat()
+logger.debug("cb set")
 
 
 # In[ ]:
@@ -300,7 +329,7 @@ cb = get_chartbeat()
 
 
 
-# In[202]:
+# In[89]:
 
 
 # See what stories are both recent and popular
@@ -325,11 +354,12 @@ def get_recent_popular(pop_cb, pop_dt):
             
 
 
-# In[203]:
+# In[90]:
 
 
 # Get the list of CMS IDs of the most popular stories that were published after 6 a.m. today
 popular = get_recent_popular(cb, dt)
+logger.debug("popular set")
 
 
 # In[ ]:
@@ -338,7 +368,7 @@ popular = get_recent_popular(cb, dt)
 
 
 
-# In[204]:
+# In[91]:
 
 
 # Need to add in some logic if there aren't enough stories!!!
@@ -350,7 +380,7 @@ popular = get_recent_popular(cb, dt)
 
 
 
-# In[205]:
+# In[92]:
 
 
 # Create AP style time format
@@ -366,7 +396,7 @@ def get_pubtime(pubtime):
     return pubtime
 
 
-# In[206]:
+# In[93]:
 
 
 #DoSomething with the list
@@ -386,7 +416,7 @@ for p in popular:
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[207]:
+# In[94]:
 
 
 out = html
@@ -398,12 +428,14 @@ out.encode('utf-8')
 try:
     write_file(out)
 except UnicodeEncodeError as err:
-    print("ERROR: {}\n----------------------------\n".format(err))
-    print(out)
+    logger.error("ERROR: {}\n----------------------------\n".format(err))
+    logger.error(out)
 
 
-# In[ ]:
+# In[95]:
 
 
-
+logger.debug("^^^^^^^^^^^^^^^^^^")
+logger.debug("- EXIT ---- EXIT -")
+logger.debug("------------------")
 
