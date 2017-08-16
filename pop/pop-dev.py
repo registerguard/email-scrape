@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[75]:
+# In[15]:
 
 
 """
@@ -21,7 +21,7 @@ TODO
 """
 
 
-# In[76]:
+# In[16]:
 
 
 from datetime import datetime
@@ -29,7 +29,7 @@ import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers
 pp = pprint.PrettyPrinter(indent=4)
 
 
-# In[77]:
+# In[17]:
 
 
 """
@@ -46,7 +46,7 @@ else:
     here = "/".join(here)
 
 
-# In[78]:
+# In[18]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -55,8 +55,10 @@ else:
 
 logger = logging.getLogger('logger')
 # set level
-#logger.setLevel(logging.DEBUG)
-logger.setLevel(logging.ERROR)
+if (dev == True):
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.ERROR)
 
 # set vars
 log_file_dir = "{}/".format(here)
@@ -65,17 +67,18 @@ fileLogger = logging.handlers.RotatingFileHandler(filename=("{0}pop.log".format(
 fileLogger.setFormatter(formatter)
 logger.addHandler(fileLogger)
 
-# Uncomment below to print to console
-#handler = logging.StreamHandler()
-#handler.setFormatter(formatter)
-#logger.addHandler(handler)
+if (dev == True):
+    # Uncomment below to print to console
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 logger.debug("------------------")
 logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
 
 
-# In[79]:
+# In[19]:
 
 
 """
@@ -105,7 +108,7 @@ def get_secret(service, token='null'):
         return secret
 
 
-# In[80]:
+# In[20]:
 
 
 """
@@ -128,13 +131,12 @@ def write_file(contents):
     f = open('{0}/html/index.html'.format(here), 'w+')
     f.write(contents)
     f.close()
-    # Write to s3 (Comment out when testing)
-    #"""
-    # See: https://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.upload_file
-    s3 = boto3.resource('s3')
-    # *** COMMENT OUT FOR DEV ***
-    s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/popular/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
-    #"""
+    if (dev == False):
+        # Write to s3 (Comment out when testing)
+        # See: https://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.upload_file
+        s3 = boto3.resource('s3')
+        # *** COMMENT OUT FOR DEV ***
+        s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/popular/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
 
 
 # In[ ]:
@@ -143,7 +145,7 @@ def write_file(contents):
 
 
 
-# In[81]:
+# In[21]:
 
 
 # Get clean datetime object from timestamp string
@@ -153,7 +155,7 @@ def clean_time(timestamp):
     return timestamp
 
 
-# In[82]:
+# In[22]:
 
 
 # Build dictionary of stories with CMS ID as key & dictionary of other data (like timestamp) as value
@@ -174,7 +176,7 @@ def id_stories(j):
     return stories
 
 
-# In[83]:
+# In[23]:
 
 
 """
@@ -233,7 +235,7 @@ logger.debug("dt set")
 
 
 
-# In[84]:
+# In[24]:
 
 
 # Make sure URL is clean and does not have protocol
@@ -242,7 +244,7 @@ def get_url(url):
     return url
 
 
-# In[85]:
+# In[25]:
 
 
 # Get CMS ID from URL
@@ -256,7 +258,7 @@ def get_id(url):
     return cms_id
 
 
-# In[86]:
+# In[26]:
 
 
 # Get Chartbeat stories
@@ -285,12 +287,16 @@ def get_cb_stories(cb_json, count=30):
                     # Check to see if you could get the CMS ID
                     if (len(cms_id)):
                         # Set CMS ID to URL
-                        most[cms_id] = url
+                        try:
+                            most[cms_id] = url
+                        except TypeError as err:
+                            logger.error(err)
+                            logger.error("Bad URL: {}".format(url))
                         c = c + 1
     return most
 
 
-# In[87]:
+# In[27]:
 
 
 # Go out to Chartbeat API and get most popular stories right now
@@ -315,7 +321,7 @@ def get_chartbeat():
     return most
 
 
-# In[88]:
+# In[28]:
 
 
 # Set cb to Chartbeat dictionary
@@ -329,7 +335,7 @@ logger.debug("cb set")
 
 
 
-# In[89]:
+# In[29]:
 
 
 # See what stories are both recent and popular
@@ -354,7 +360,7 @@ def get_recent_popular(pop_cb, pop_dt):
             
 
 
-# In[90]:
+# In[30]:
 
 
 # Get the list of CMS IDs of the most popular stories that were published after 6 a.m. today
@@ -368,7 +374,7 @@ logger.debug("popular set")
 
 
 
-# In[91]:
+# In[31]:
 
 
 # Need to add in some logic if there aren't enough stories!!!
@@ -380,7 +386,7 @@ logger.debug("popular set")
 
 
 
-# In[92]:
+# In[32]:
 
 
 # Create AP style time format
@@ -396,7 +402,7 @@ def get_pubtime(pubtime):
     return pubtime
 
 
-# In[93]:
+# In[33]:
 
 
 #DoSomething with the list
@@ -416,7 +422,7 @@ for p in popular:
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[94]:
+# In[34]:
 
 
 out = html
@@ -432,7 +438,7 @@ except UnicodeEncodeError as err:
     logger.error(out)
 
 
-# In[95]:
+# In[35]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")
