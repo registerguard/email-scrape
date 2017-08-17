@@ -1,27 +1,31 @@
 
 # coding: utf-8
 
-# In[15]:
+# In[127]:
 
 
 """
 
 GET RECENT, POPULAR STORIES
- - Queries DT and Chartbeat and creates list of 
-   ... most popular stories published since 6 a.m.
+ - Get DT
+  > Build dict w/ only updates (published after 6 a.m today)
+  > Merge local & sports (or not?)
+ - Get CB
+  > Create list of IDs (because order matters!) 
+ - Loop over list and do lookups on merged dict to build HTML
+ - Write file
 
-CREATED
- - 8/14/17
+UPDATED
+ - 8/16/17
  - Rob Denton/The Register-Guard
 
 TODO
- - Add logging
- - Re-organize file structure
+ - Fix shit
 
 """
 
 
-# In[16]:
+# In[128]:
 
 
 from datetime import datetime
@@ -29,7 +33,7 @@ import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers
 pp = pprint.PrettyPrinter(indent=4)
 
 
-# In[17]:
+# In[129]:
 
 
 """
@@ -46,7 +50,7 @@ else:
     here = "/".join(here)
 
 
-# In[18]:
+# In[130]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -67,18 +71,19 @@ fileLogger = logging.handlers.RotatingFileHandler(filename=("{0}pop.log".format(
 fileLogger.setFormatter(formatter)
 logger.addHandler(fileLogger)
 
+"""
 if (dev == True):
     # Uncomment below to print to console
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-
+"""
 logger.debug("------------------")
 logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
 
 
-# In[19]:
+# In[131]:
 
 
 """
@@ -108,7 +113,7 @@ def get_secret(service, token='null'):
         return secret
 
 
-# In[20]:
+# In[132]:
 
 
 """
@@ -145,17 +150,25 @@ def write_file(contents):
 
 
 
-# In[21]:
+# In[133]:
 
 
 # Get clean datetime object from timestamp string
 def clean_time(timestamp):
+    # Current datetime
+    now = datetime.now()
+    # Get datetime for 6 a.m. today
+    then = datetime(now.year, now.month, now.day, 6, 0, 0)
     # See: https://docs.python.org/2/library/datetime.html#datetime.datetime.strptime
     timestamp = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
-    return timestamp
+    if timestamp > then:
+        update = True
+    else:
+        update = False
+    return [timestamp, update]
 
 
-# In[22]:
+# In[134]:
 
 
 # Build dictionary of stories with CMS ID as key & dictionary of other data (like timestamp) as value
@@ -164,19 +177,20 @@ def id_stories(j):
     stories = {}
     # Loop over stories
     for story in j['stories']:
-        # Get CMS ID
-        sid = story['id']
-        # Get rid of extra values we don't need
-        story.pop('id')
-        story.pop('total')
         # Parse timestamp as datetime
-        story['timestamp'] = clean_time(story['timestamp'])
-        # Create dictionary
-        stories[sid] = story
+        story['timestamp'], update = clean_time(story['timestamp'])
+        if (update == True):
+            # Get CMS ID
+            sid = story['id']
+            # Get rid of extra values we don't need
+            story.pop('id')
+            story.pop('total')
+            # Create dictionary
+            stories[sid] = story
     return stories
 
 
-# In[23]:
+# In[135]:
 
 
 """
@@ -235,16 +249,7 @@ logger.debug("dt set")
 
 
 
-# In[24]:
-
-
-# Make sure URL is clean and does not have protocol
-def get_url(url):
-    url = "http://{}".format(url)
-    return url
-
-
-# In[25]:
+# In[136]:
 
 
 # Get CMS ID from URL
@@ -258,14 +263,14 @@ def get_id(url):
     return cms_id
 
 
-# In[26]:
+# In[137]:
 
 
 # Get Chartbeat stories
 #  - Create dictionary where keys are CMS IDs and values are dictionaries of data
-def get_cb_stories(cb_json, count=30):
+def get_cb_stories(cb_json, count=20):
     # Create empty dictionary
-    most = {}
+    most = []
     # Create counter
     c = 0
     # Loop over stories in Chartbeat JSON response
@@ -275,28 +280,23 @@ def get_cb_stories(cb_json, count=30):
             # Check to see if it's an article (not alwasy perfect)
             if (i['stats']['type'] == 'Article'):
                 # Get clean URL
-                url = get_url(i['path'])
+                url = i['path']
                 # Check to see if the domain is RG.com
-                if (url.split("/")[2] == "registerguard.com"):
+                if (url.split("/")[0] == "registerguard.com"):
                     # Try to get CMS ID
                     try:
                         cms_id = get_id(url)
                     except:
-                        most = None
-                        logger.error("ERROR: Not a proper registerguard.com url\n --- URL: {}".format(url))
+                        logger.error("ERROR: BAD URL\n --- URL: {}".format(url))
                     # Check to see if you could get the CMS ID
-                    if (len(cms_id)):
-                        # Set CMS ID to URL
-                        try:
-                            most[cms_id] = url
-                        except TypeError as err:
-                            logger.error(err)
-                            logger.error("Bad URL: {}".format(url))
+                    if (cms_id != None):
+                        # Add id to most
+                        most.append(cms_id)
                         c = c + 1
     return most
 
 
-# In[27]:
+# In[138]:
 
 
 # Go out to Chartbeat API and get most popular stories right now
@@ -321,7 +321,7 @@ def get_chartbeat():
     return most
 
 
-# In[28]:
+# In[139]:
 
 
 # Set cb to Chartbeat dictionary
@@ -335,37 +335,20 @@ logger.debug("cb set")
 
 
 
-# In[29]:
+# In[140]:
 
 
-# See what stories are both recent and popular
-def get_recent_popular(pop_cb, pop_dt):
-    # Current datetime
-    now = datetime.now()
-    # Get datetime for 6 a.m. today
-    then = datetime(now.year, now.month, now.day, 6, 0, 0)
-    # Create empty list
+def get_pop(c, d):
     pop = []
-    # Loop over Chartbeat stories (so that this is the order)
-    for s in pop_cb:
-        # Check to see if the story is in the DT list
-        if s in pop_dt:
-            # Set story timestamp
-            timestamp = pop_dt[s]['timestamp']
-            # Check to see if that story was published after 6 a.m. today
-            if timestamp > then:
-                # Add that story's CMS ID to the pop list
-                pop.append(s)
+    for i in c:
+        if (i in d.keys()):
+            one = {}
+            one = dt[i]
+            one['id'] = i
+            pop.append(one)
     return pop
-            
 
-
-# In[30]:
-
-
-# Get the list of CMS IDs of the most popular stories that were published after 6 a.m. today
-popular = get_recent_popular(cb, dt)
-logger.debug("popular set")
+popular = get_pop(cb, dt)
 
 
 # In[ ]:
@@ -374,7 +357,7 @@ logger.debug("popular set")
 
 
 
-# In[31]:
+# In[141]:
 
 
 # Need to add in some logic if there aren't enough stories!!!
@@ -386,7 +369,7 @@ logger.debug("popular set")
 
 
 
-# In[32]:
+# In[142]:
 
 
 # Create AP style time format
@@ -402,7 +385,7 @@ def get_pubtime(pubtime):
     return pubtime
 
 
-# In[33]:
+# In[143]:
 
 
 #DoSomething with the list
@@ -410,11 +393,11 @@ def get_pubtime(pubtime):
 html = u""
 for p in popular:
     # Get clean data
-    cat = dt[p]['category']
-    pubtime = get_pubtime(dt[p]['timestamp'])
-    url = cb[p]
+    cat = p['category']
+    pubtime = get_pubtime(p['timestamp'])
+    url = p['url']
     ymd = u"{0}{1}{2}".format(datetime.now().year,datetime.now().month,datetime.now().day)
-    head = dt[p]['headline']
+    head = p['headline']
     # Do string concatenation (YUCK!)
     html += u"<h4>{}</h4>\n".format(cat)
     html += u"<h2><a href='{0}?utm_source=afternoon&utm_medium=email&utm_campaign=afternoon_{1}&utm_content=headline'>{2}</a></h2>".format(url,ymd,head)
@@ -422,7 +405,7 @@ for p in popular:
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[34]:
+# In[144]:
 
 
 out = html
@@ -438,7 +421,7 @@ except UnicodeEncodeError as err:
     logger.error(out)
 
 
-# In[35]:
+# In[145]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")

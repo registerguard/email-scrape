@@ -4,4 +4,4 @@ secrets.json
 chartbeat-dev.ipynb
 combined-dev.ipynb
 **/.ipynb_checkpoints/**
-*.log
+**.log
