@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[61]:
+# In[1]:
 
 
 """
@@ -25,7 +25,7 @@ TODO
 """
 
 
-# In[62]:
+# In[2]:
 
 
 from datetime import datetime
@@ -33,14 +33,14 @@ import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers, co
 pp = pprint.PrettyPrinter(indent=4)
 
 
-# In[63]:
+# In[3]:
 
 
 """
  --- SET TO TRUE IF TESTING, FALSE BEFORE YOU PUSH TO GITHUB/WAVE ---
 """
 
-dev = False
+dev = True
 
 if (dev == True):
     here = os.path.abspath('.')
@@ -50,7 +50,7 @@ else:
     here = "/".join(here)
 
 
-# In[64]:
+# In[4]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
 
 
-# In[65]:
+# In[5]:
 
 
 """
@@ -114,7 +114,7 @@ def get_secret(service, token='null'):
         return secret
 
 
-# In[66]:
+# In[6]:
 
 
 """
@@ -150,7 +150,7 @@ def write_file(contents):
 
 
 
-# In[67]:
+# In[7]:
 
 
 # Get clean datetime object from timestamp string
@@ -160,7 +160,7 @@ def clean_time(timestamp):
     return timestamp
 
 
-# In[68]:
+# In[8]:
 
 
 # Build dictionary of stories with CMS ID as key & dictionary of other data (like timestamp) as value
@@ -181,7 +181,7 @@ def id_stories(j):
     return stories
 
 
-# In[69]:
+# In[9]:
 
 
 """
@@ -239,19 +239,19 @@ logger.debug("dt set:\n{}".format(dt))
 
 
 
-# In[70]:
+# In[10]:
 
 
 def get_updates(d):
     # So you don't delete from dt
-    print(type(d))
+    #print(type(d))
     u = copy.copy(d)
     # Current datetime
     now = datetime.now()
     # Get datetime for 6 a.m. today
     then = datetime(now.year, now.month, now.day, 6, 0, 0)
     for i in u.keys():
-        print(u[i]['timestamp'])
+        #print(u[i]['timestamp'])
         if u[i]['timestamp'] < then:
             del(u[i])
     return u
@@ -272,7 +272,7 @@ for i in updates:
 
 
 
-# In[71]:
+# In[11]:
 
 
 # Get CMS ID from URL
@@ -286,7 +286,7 @@ def get_id(url):
     return cms_id
 
 
-# In[72]:
+# In[12]:
 
 
 # Get Chartbeat stories
@@ -319,7 +319,7 @@ def get_cb_stories(cb_json, count=20):
     return most
 
 
-# In[73]:
+# In[13]:
 
 
 # Go out to Chartbeat API and get most popular stories right now
@@ -344,7 +344,7 @@ def get_chartbeat():
     return most
 
 
-# In[74]:
+# In[14]:
 
 
 # Set cb to Chartbeat dictionary
@@ -358,11 +358,11 @@ logger.debug("cb set:\n{}".format(cb))
 
 
 
-# In[75]:
+# In[15]:
 
 
-print(len(updates))
-print(len(dt))
+#print(len(updates))
+#print(len(dt))
 if (len(updates) < 5):
     system_stories = dt
 else:
@@ -394,7 +394,7 @@ logger.debug("popular set:\n{}".format(popular))
 
 
 
-# In[76]:
+# In[16]:
 
 
 # Need to add in some logic if there aren't enough stories!!!
@@ -406,7 +406,7 @@ logger.debug("popular set:\n{}".format(popular))
 
 
 
-# In[77]:
+# In[17]:
 
 
 # Create AP style time format
@@ -422,7 +422,7 @@ def get_pubtime(pubtime):
     return pubtime
 
 
-# In[78]:
+# In[18]:
 
 
 #DoSomething with the list
@@ -442,7 +442,7 @@ for p in popular:
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[79]:
+# In[19]:
 
 
 out = html
@@ -459,7 +459,7 @@ except UnicodeEncodeError as err:
     logger.error(out)
 
 
-# In[80]:
+# In[20]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")
