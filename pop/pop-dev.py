@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[127]:
+# In[61]:
 
 
 """
@@ -25,15 +25,15 @@ TODO
 """
 
 
-# In[128]:
+# In[62]:
 
 
 from datetime import datetime
-import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers
+import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers, copy
 pp = pprint.PrettyPrinter(indent=4)
 
 
-# In[129]:
+# In[63]:
 
 
 """
@@ -50,7 +50,7 @@ else:
     here = "/".join(here)
 
 
-# In[130]:
+# In[64]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -78,12 +78,13 @@ if (dev == True):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 """
+
 logger.debug("------------------")
 logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
 
 
-# In[131]:
+# In[65]:
 
 
 """
@@ -113,7 +114,7 @@ def get_secret(service, token='null'):
         return secret
 
 
-# In[132]:
+# In[66]:
 
 
 """
@@ -130,7 +131,6 @@ Example:
  - write_file(html)
 
 """
-
 
 def write_file(contents):
     f = open('{0}/html/index.html'.format(here), 'w+')
@@ -150,25 +150,17 @@ def write_file(contents):
 
 
 
-# In[133]:
+# In[67]:
 
 
 # Get clean datetime object from timestamp string
 def clean_time(timestamp):
-    # Current datetime
-    now = datetime.now()
-    # Get datetime for 6 a.m. today
-    then = datetime(now.year, now.month, now.day, 6, 0, 0)
     # See: https://docs.python.org/2/library/datetime.html#datetime.datetime.strptime
     timestamp = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
-    if timestamp > then:
-        update = True
-    else:
-        update = False
-    return [timestamp, update]
+    return timestamp
 
 
-# In[134]:
+# In[68]:
 
 
 # Build dictionary of stories with CMS ID as key & dictionary of other data (like timestamp) as value
@@ -178,19 +170,18 @@ def id_stories(j):
     # Loop over stories
     for story in j['stories']:
         # Parse timestamp as datetime
-        story['timestamp'], update = clean_time(story['timestamp'])
-        if (update == True):
-            # Get CMS ID
-            sid = story['id']
-            # Get rid of extra values we don't need
-            story.pop('id')
-            story.pop('total')
-            # Create dictionary
-            stories[sid] = story
+        story['timestamp'] = clean_time(story['timestamp'])
+        # Get CMS ID
+        sid = story['id']
+        # Get rid of extra values we don't need
+        story.pop('id')
+        story.pop('total')
+        # Create dictionary
+        stories[sid] = story
     return stories
 
 
-# In[135]:
+# In[69]:
 
 
 """
@@ -239,8 +230,7 @@ sports = get_stories('sports','Top Updates')
 dt = {}
 dt.update(local)
 dt.update(sports)
-
-logger.debug("dt set")
+logger.debug("dt set:\n{}".format(dt))
 
 
 # In[ ]:
@@ -249,7 +239,40 @@ logger.debug("dt set")
 
 
 
-# In[136]:
+# In[70]:
+
+
+def get_updates(d):
+    # So you don't delete from dt
+    print(type(d))
+    u = copy.copy(d)
+    # Current datetime
+    now = datetime.now()
+    # Get datetime for 6 a.m. today
+    then = datetime(now.year, now.month, now.day, 6, 0, 0)
+    for i in u.keys():
+        print(u[i]['timestamp'])
+        if u[i]['timestamp'] < then:
+            del(u[i])
+    return u
+
+updates = get_updates(dt)
+"""print("\n")
+print("dt")
+for i in dt:
+    print(dt[i]['timestamp'])
+print("updates")
+for i in updates:
+    print(updates[i]['timestamp'])"""
+
+
+# In[ ]:
+
+
+
+
+
+# In[71]:
 
 
 # Get CMS ID from URL
@@ -263,7 +286,7 @@ def get_id(url):
     return cms_id
 
 
-# In[137]:
+# In[72]:
 
 
 # Get Chartbeat stories
@@ -296,7 +319,7 @@ def get_cb_stories(cb_json, count=20):
     return most
 
 
-# In[138]:
+# In[73]:
 
 
 # Go out to Chartbeat API and get most popular stories right now
@@ -321,12 +344,12 @@ def get_chartbeat():
     return most
 
 
-# In[139]:
+# In[74]:
 
 
 # Set cb to Chartbeat dictionary
 cb = get_chartbeat()
-logger.debug("cb set")
+logger.debug("cb set:\n{}".format(cb))
 
 
 # In[ ]:
@@ -335,20 +358,34 @@ logger.debug("cb set")
 
 
 
-# In[140]:
+# In[75]:
 
 
-def get_pop(c, d):
+print(len(updates))
+print(len(dt))
+if (len(updates) < 5):
+    system_stories = dt
+else:
+    system_stories = updates
+
+
+#pp.pprint(system_stories)    
+
+def get_pop(c, s):
     pop = []
     for i in c:
-        if (i in d.keys()):
+        if (i in s.keys()):
             one = {}
-            one = dt[i]
+            one = s[i]
             one['id'] = i
             pop.append(one)
+    logger.debug("length: {}".format(len(pop)))
     return pop
 
-popular = get_pop(cb, dt)
+popular = get_pop(cb, system_stories)
+#pp.pprint(popular)
+#print(len(popular))
+logger.debug("popular set:\n{}".format(popular))
 
 
 # In[ ]:
@@ -357,7 +394,7 @@ popular = get_pop(cb, dt)
 
 
 
-# In[141]:
+# In[76]:
 
 
 # Need to add in some logic if there aren't enough stories!!!
@@ -369,7 +406,7 @@ popular = get_pop(cb, dt)
 
 
 
-# In[142]:
+# In[77]:
 
 
 # Create AP style time format
@@ -385,7 +422,7 @@ def get_pubtime(pubtime):
     return pubtime
 
 
-# In[143]:
+# In[78]:
 
 
 #DoSomething with the list
@@ -405,7 +442,7 @@ for p in popular:
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[144]:
+# In[79]:
 
 
 out = html
@@ -414,6 +451,7 @@ out = out.replace( u'\u2019', u"'")
 out = out.replace( u'\u201c', u'"')
 out = out.replace( u'\u201d', u'"')
 out.encode('utf-8')
+logger.debug("out set:\n{}".format(out))
 try:
     write_file(out)
 except UnicodeEncodeError as err:
@@ -421,10 +459,16 @@ except UnicodeEncodeError as err:
     logger.error(out)
 
 
-# In[145]:
+# In[80]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")
 logger.debug("- EXIT ---- EXIT -")
 logger.debug("------------------")
+
+
+# In[ ]:
+
+
+
 
