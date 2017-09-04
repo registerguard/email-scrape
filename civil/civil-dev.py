@@ -1,6 +1,7 @@
+
 # coding: utf-8
 
-# In[68]:
+# In[35]:
 
 
 """
@@ -20,7 +21,7 @@ TODO
 import requests, json, boto3, os, sys, logging, logging.handlers
 
 
-# In[69]:
+# In[36]:
 
 
 """
@@ -36,8 +37,10 @@ else:
     here.pop()
     here = "/".join(here)
 
+print(dev)
 
-# In[70]:
+
+# In[37]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -46,8 +49,12 @@ else:
 
 logger = logging.getLogger('logger')
 # set level
-#logger.setLevel(logging.DEBUG)
-logger.setLevel(logging.ERROR)
+print(dev)
+print(here)
+if (dev == True):
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.ERROR)
 
 # set vars
 log_file_dir = "{}/".format(here)
@@ -56,17 +63,21 @@ fileLogger = logging.handlers.RotatingFileHandler(filename=("{0}civil.log".forma
 fileLogger.setFormatter(formatter)
 logger.addHandler(fileLogger)
 
-# Uncomment below to print to console
-#handler = logging.StreamHandler()
-#handler.setFormatter(formatter)
-#logger.addHandler(handler)
+"""
+if (dev == True):
+    # Uncomment below to print to console
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+"""
 
 logger.debug("------------------")
 logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
+print('logging')
 
 
-# In[71]:
+# In[38]:
 
 
 """
@@ -84,22 +95,19 @@ Example:
 
 """
 
-
 def write_file(contents):
     f = open('{0}/html/index.html'.format(here), 'w+')
-    logger.error
     f.write(contents)
     f.close()
-    # Write to s3 (Comment out when testing)
-    #"""
-    # See: https://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.upload_file
-    s3 = boto3.resource('s3')
-    # *** COMMENT OUT FOR DEV ***
-    s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/civil/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
-    #"""
+    if (dev == False):
+        # Write to s3 (Comment out when testing)
+        # See: https://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.upload_file
+        s3 = boto3.resource('s3')
+        # *** COMMENT OUT FOR DEV ***
+        s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/civil/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
 
 
-# In[72]:
+# In[39]:
 
 
 def get_url(url):
@@ -107,7 +115,7 @@ def get_url(url):
     return url
 
 
-# In[73]:
+# In[40]:
 
 
 def get_civil():
@@ -127,7 +135,7 @@ def get_civil():
     return cv_json
 
 
-# In[74]:
+# In[41]:
 
 
 def analyze_civil(cv_json):
@@ -143,7 +151,7 @@ def analyze_civil(cv_json):
     return html
 
 
-# In[75]:
+# In[42]:
 
 
 cv = get_civil()
@@ -151,11 +159,11 @@ cv_html = analyze_civil(cv)
 #print(cv_html)
 
 
-# In[76]:
+# In[43]:
 
 
 code = u"{}".format(cv_html)
-code = code.encode('utf-8')
+code = code.encode('utf8')
 try:
     write_file(code)
 except:
@@ -163,3 +171,7 @@ except:
 
 
 # In[ ]:
+
+
+
+
