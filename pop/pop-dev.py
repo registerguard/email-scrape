@@ -1,4 +1,3 @@
-
 # coding: utf-8
 
 # In[1]:
@@ -40,7 +39,7 @@ pp = pprint.PrettyPrinter(indent=4)
  --- SET TO TRUE IF TESTING, FALSE BEFORE YOU PUSH TO GITHUB/WAVE ---
 """
 
-dev = True
+dev = False
 
 if (dev == True):
     here = os.path.abspath('.')
@@ -450,7 +449,9 @@ out = out.replace( u'\u2018', u"'")
 out = out.replace( u'\u2019', u"'")
 out = out.replace( u'\u201c', u'"')
 out = out.replace( u'\u201d', u'"')
-out.encode('utf-8')
+out = out.replace( u'\u2014', u'–')
+out = out.replace( u'\u2013', u'-')
+out.encode('utf8')
 logger.debug("out set:\n{}".format(out))
 try:
     write_file(out)
@@ -468,7 +469,3 @@ logger.debug("------------------")
 
 
 # In[ ]:
-
-
-
-

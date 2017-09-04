@@ -1,4 +1,3 @@
-
 # coding: utf-8
 
 # In[68]:
@@ -30,7 +29,7 @@ import requests, json, boto3, os, sys, logging, logging.handlers
 
 dev = False
 
-if (dev == False):
+if (dev == True):
     here = os.path.abspath('.')
 else:
     here = sys.argv[0].split('/')
@@ -164,7 +163,3 @@ except:
 
 
 # In[ ]:
-
-
-
-
