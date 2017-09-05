@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[35]:
+# In[10]:
 
 
 """
@@ -21,7 +21,7 @@ TODO
 import requests, json, boto3, os, sys, logging, logging.handlers
 
 
-# In[36]:
+# In[11]:
 
 
 """
@@ -37,10 +37,10 @@ else:
     here.pop()
     here = "/".join(here)
 
-print(dev)
+#print(dev)
 
 
-# In[37]:
+# In[12]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -49,8 +49,6 @@ print(dev)
 
 logger = logging.getLogger('logger')
 # set level
-print(dev)
-print(here)
 if (dev == True):
     logger.setLevel(logging.DEBUG)
 else:
@@ -74,10 +72,10 @@ if (dev == True):
 logger.debug("------------------")
 logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
-print('logging')
+#print('logging')
 
 
-# In[38]:
+# In[13]:
 
 
 """
@@ -97,7 +95,7 @@ Example:
 
 def write_file(contents):
     f = open('{0}/html/index.html'.format(here), 'w+')
-    f.write(contents)
+    f.write(contents.encode('utf8'))
     f.close()
     if (dev == False):
         # Write to s3 (Comment out when testing)
@@ -107,7 +105,7 @@ def write_file(contents):
         s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/civil/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
 
 
-# In[39]:
+# In[14]:
 
 
 def get_url(url):
@@ -115,7 +113,7 @@ def get_url(url):
     return url
 
 
-# In[40]:
+# In[15]:
 
 
 def get_civil():
@@ -131,11 +129,10 @@ def get_civil():
         logger.error("REQUEST ERROR - {0}: {1}".format(url,params))
     if (len(r.text)):
         cv_json = r.json()
-    #print cv_json
     return cv_json
 
 
-# In[41]:
+# In[16]:
 
 
 def analyze_civil(cv_json):
@@ -146,32 +143,29 @@ def analyze_civil(cv_json):
         # Get story variables
         url = get_url(i['url'])
         title = i['title']
+        logger.debug(title)
         comments = i['comments_count']
         html += u"<h3><a href='{0}' target='_blank'>{1} ({2} comments)</a></h3>\n".format(url, title, comments)
     return html
 
 
-# In[42]:
+# In[17]:
 
 
 cv = get_civil()
 cv_html = analyze_civil(cv)
-#print(cv_html)
 
-
-# In[43]:
-
-
-code = u"{}".format(cv_html)
-code = code.encode('utf8')
 try:
-    write_file(code)
+    #logger.debug(cv_html)
+    write_file(cv_html)
 except:
     logger.error("WRITE ERROR - Cannot write_file")
 
 
-# In[ ]:
+# In[18]:
 
 
-
+logger.debug("^^^^^^^^^^^^^^^^^^")
+logger.debug(" - EXIT --- EXIT -")
+logger.debug("------------------")
 

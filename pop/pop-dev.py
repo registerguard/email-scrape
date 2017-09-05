@@ -134,7 +134,7 @@ Example:
 
 def write_file(contents):
     f = open('{0}/html/index.html'.format(here), 'w+')
-    f.write(contents)
+    f.write(contents.encode('utf8'))
     f.close()
     if (dev == False):
         # Write to s3 (Comment out when testing)
@@ -445,15 +445,8 @@ for p in popular:
 # In[19]:
 
 
+logger.debug(html)
 out = html
-out = out.replace( u'\u2018', u"'")
-out = out.replace( u'\u2019', u"'")
-out = out.replace( u'\u201c', u'"')
-out = out.replace( u'\u201d', u'"')
-out = out.replace( u'\u2014', u'–')
-out = out.replace( u'\u2013', u'-')
-out.encode('utf8')
-logger.debug("out set:\n{}".format(out))
 try:
     write_file(out)
 except UnicodeEncodeError as err:
