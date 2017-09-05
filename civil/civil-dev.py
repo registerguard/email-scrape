@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[10]:
+# In[1]:
 
 
 """
@@ -21,7 +21,7 @@ TODO
 import requests, json, boto3, os, sys, logging, logging.handlers
 
 
-# In[11]:
+# In[2]:
 
 
 """
@@ -40,7 +40,7 @@ else:
 #print(dev)
 
 
-# In[12]:
+# In[3]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ logger.debug("vvvvvvvvvvvvvvvvvv")
 #print('logging')
 
 
-# In[13]:
+# In[4]:
 
 
 """
@@ -95,7 +95,7 @@ Example:
 
 def write_file(contents):
     f = open('{0}/html/index.html'.format(here), 'w+')
-    f.write(contents.encode('utf8'))
+    f.write(contents.encode('ascii', 'xmlcharrefreplace'))
     f.close()
     if (dev == False):
         # Write to s3 (Comment out when testing)
@@ -105,7 +105,7 @@ def write_file(contents):
         s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/civil/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
 
 
-# In[14]:
+# In[5]:
 
 
 def get_url(url):
@@ -113,7 +113,7 @@ def get_url(url):
     return url
 
 
-# In[15]:
+# In[6]:
 
 
 def get_civil():
@@ -132,7 +132,7 @@ def get_civil():
     return cv_json
 
 
-# In[16]:
+# In[7]:
 
 
 def analyze_civil(cv_json):
@@ -149,7 +149,7 @@ def analyze_civil(cv_json):
     return html
 
 
-# In[17]:
+# In[8]:
 
 
 cv = get_civil()
@@ -162,7 +162,7 @@ except:
     logger.error("WRITE ERROR - Cannot write_file")
 
 
-# In[18]:
+# In[9]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")

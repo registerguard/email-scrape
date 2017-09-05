@@ -134,7 +134,7 @@ Example:
 
 def write_file(contents):
     f = open('{0}/html/index.html'.format(here), 'w+')
-    f.write(contents.encode('utf8'))
+    f.write(contents.encode('ascii', 'xmlcharrefreplace'))
     f.close()
     if (dev == False):
         # Write to s3 (Comment out when testing)
