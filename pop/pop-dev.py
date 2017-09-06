@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[21]:
 
 
 """
@@ -25,7 +25,7 @@ TODO
 """
 
 
-# In[2]:
+# In[22]:
 
 
 from datetime import datetime
@@ -33,7 +33,7 @@ import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers, co
 pp = pprint.PrettyPrinter(indent=4)
 
 
-# In[3]:
+# In[23]:
 
 
 """
@@ -50,7 +50,7 @@ else:
     here = "/".join(here)
 
 
-# In[4]:
+# In[24]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
 
 
-# In[5]:
+# In[25]:
 
 
 """
@@ -114,7 +114,7 @@ def get_secret(service, token='null'):
         return secret
 
 
-# In[6]:
+# In[26]:
 
 
 """
@@ -150,7 +150,7 @@ def write_file(contents):
 
 
 
-# In[7]:
+# In[27]:
 
 
 # Get clean datetime object from timestamp string
@@ -160,7 +160,7 @@ def clean_time(timestamp):
     return timestamp
 
 
-# In[8]:
+# In[28]:
 
 
 # Build dictionary of stories with CMS ID as key & dictionary of other data (like timestamp) as value
@@ -181,7 +181,7 @@ def id_stories(j):
     return stories
 
 
-# In[9]:
+# In[29]:
 
 
 """
@@ -239,7 +239,7 @@ dt.update(sports)
 
 
 
-# In[10]:
+# In[30]:
 
 
 def get_updates(d):
@@ -276,7 +276,7 @@ updates = get_updates(dt)
 
 
 
-# In[11]:
+# In[31]:
 
 
 # Get CMS ID from URL
@@ -290,7 +290,7 @@ def get_id(url):
     return cms_id
 
 
-# In[12]:
+# In[32]:
 
 
 # Get Chartbeat stories
@@ -323,7 +323,7 @@ def get_cb_stories(cb_json, count=20):
     return most
 
 
-# In[13]:
+# In[33]:
 
 
 # Go out to Chartbeat API and get most popular stories right now
@@ -348,7 +348,7 @@ def get_chartbeat():
     return most
 
 
-# In[14]:
+# In[34]:
 
 
 # Set cb to Chartbeat dictionary
@@ -362,7 +362,7 @@ logger.debug("cb set:\n{}".format(cb))
 
 
 
-# In[15]:
+# In[35]:
 
 
 #print(len(updates))
@@ -398,7 +398,7 @@ logger.debug("popular set:\n{}".format(popular))
 
 
 
-# In[16]:
+# In[36]:
 
 
 # Need to add in some logic if there aren't enough stories!!!
@@ -410,7 +410,7 @@ logger.debug("popular set:\n{}".format(popular))
 
 
 
-# In[17]:
+# In[37]:
 
 
 # Create AP style time format
@@ -426,19 +426,27 @@ def get_pubtime(pubtime):
     return pubtime
 
 
-# In[18]:
+# In[38]:
 
 
 #DoSomething with the list
 # Maybe write_file()?
 html = u""
-for p in popular:
+for n, p in enumerate(popular):
     # Get clean data
     cat = p['category']
     pubtime = get_pubtime(p['timestamp'])
     url = p['url']
     ymd = u"{0}{1}{2}".format(datetime.now().year,datetime.now().month,datetime.now().day)
     head = p['headline']
+    if (n == 0):
+        #img = p['image-medium']
+        # In the future I'd like the lead visual to be stronger but don't have time now
+        img = p['image-small']
+    else:
+        img = p['image-small']
+    if len(img):
+        html += u"<div class='img'>\n<a href='{0}'><img src='{1}' alt='Story img'></a></div>".format(url,img)
     # Do string concatenation (YUCK!)
     html += u"<h4>{}</h4>\n".format(cat)
     html += u"<h2><a href='{0}?utm_source=afternoon&utm_medium=email&utm_campaign=afternoon_{1}&utm_content=headline'>{2}</a></h2>".format(url,ymd,head)
@@ -446,7 +454,7 @@ for p in popular:
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[19]:
+# In[39]:
 
 
 logger.debug(html)
@@ -458,7 +466,7 @@ except UnicodeEncodeError as err:
     logger.error(out)
 
 
-# In[20]:
+# In[40]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")
