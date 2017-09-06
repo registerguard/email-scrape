@@ -145,7 +145,7 @@ def analyze_civil(cv_json):
         title = i['title']
         logger.debug(title)
         comments = i['comments_count']
-        html += u"<h3><a href='{0}' target='_blank'>{1} ({2} comments)</a></h3>\n".format(url, title, comments)
+        html += u"<h2><a href='{0}' target='_blank'>{1}</a> – {2} comments</h2>\n<hr>\n".format(url, title, comments)
     return html
 
 
