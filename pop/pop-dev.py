@@ -450,7 +450,7 @@ for n, p in enumerate(popular):
     # Do string concatenation (YUCK!)
     html += u"<h4>{}</h4>\n".format(cat)
     html += u"<h2><a href='{0}?utm_source=afternoon&utm_medium=email&utm_campaign=afternoon_{1}&utm_content=headline'>{2}</a></h2>".format(url,ymd,head)
-    html += u"<p class='italic'>Published today at: {}</p>\n".format(pubtime)
+    html += u"<p class='italic'>Published today at {}</p>\n".format(pubtime)
     html += u"<hr style='clear:both'>\n\n"
 
 
