@@ -132,24 +132,24 @@ def get_civil():
     return cv_json
 
 
-# In[7]:
+# In[11]:
 
 
 def analyze_civil(cv_json):
     # HTML
     html = u""
     # Control number of titles
-    for i in cv_json['topics']:
+    for n, i in enumerate(cv_json['topics']):
         # Get story variables
         url = get_url(i['url'])
         title = i['title']
         logger.debug(title)
         comments = i['comments_count']
-        html += u"<h2><a href='{0}' target='_blank'>{1}</a> – {2} comments</h2>\n<hr>\n".format(url, title, comments)
+        html += u"<h2>{0}) <a href='{1}' target='_blank'>{2}</a> – {3} comments</h2>\n<hr>\n".format(n+1, url, title, comments)
     return html
 
 
-# In[8]:
+# In[12]:
 
 
 cv = get_civil()
