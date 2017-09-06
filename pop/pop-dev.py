@@ -230,7 +230,7 @@ sports = get_stories('sports','Top Updates')
 dt = {}
 dt.update(local)
 dt.update(sports)
-logger.debug("dt set:\n{}".format(dt))
+#logger.debug("dt set:\n{}".format(dt))
 
 
 # In[ ]:
@@ -254,16 +254,20 @@ def get_updates(d):
         #print(u[i]['timestamp'])
         if u[i]['timestamp'] < then:
             del(u[i])
+        #    print("fail")
+        #else:
+        #    print("SUCCESS")
     return u
 
 updates = get_updates(dt)
-"""print("\n")
-print("dt")
-for i in dt:
-    print(dt[i]['timestamp'])
-print("updates")
-for i in updates:
-    print(updates[i]['timestamp'])"""
+#print(len(updates))
+#print("\n")
+#print("dt")
+#for i in dt:
+#    print(dt[i]['timestamp'])
+#print("updates")
+#for i in updates:
+#    print(updates[i]['timestamp'])"""
 
 
 # In[ ]:
@@ -438,7 +442,7 @@ for p in popular:
     # Do string concatenation (YUCK!)
     html += u"<h4>{}</h4>\n".format(cat)
     html += u"<h2><a href='{0}?utm_source=afternoon&utm_medium=email&utm_campaign=afternoon_{1}&utm_content=headline'>{2}</a></h2>".format(url,ymd,head)
-    html += u"<p>Published today at: {}\n".format(pubtime)
+    html += u"<p class='italic'>Published today at: {}</p>\n".format(pubtime)
     html += u"<hr style='clear:both'>\n\n"
 
 
