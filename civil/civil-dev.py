@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[126]:
 
 
 """
@@ -21,7 +21,7 @@ TODO
 import requests, json, boto3, os, sys, logging, logging.handlers
 
 
-# In[2]:
+# In[127]:
 
 
 """
@@ -40,7 +40,7 @@ else:
 #print(dev)
 
 
-# In[3]:
+# In[128]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ logger.debug("vvvvvvvvvvvvvvvvvv")
 #print('logging')
 
 
-# In[4]:
+# In[129]:
 
 
 """
@@ -105,7 +105,7 @@ def write_file(contents):
         s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/civil/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
 
 
-# In[5]:
+# In[130]:
 
 
 def get_url(url):
@@ -113,7 +113,7 @@ def get_url(url):
     return url
 
 
-# In[6]:
+# In[131]:
 
 
 def get_civil():
@@ -132,12 +132,12 @@ def get_civil():
     return cv_json
 
 
-# In[11]:
+# In[132]:
 
 
 def analyze_civil(cv_json):
     # HTML
-    html = u""
+    html = u"<table class='ol'>\n"
     # Control number of titles
     for n, i in enumerate(cv_json['topics']):
         # Get story variables
@@ -145,11 +145,16 @@ def analyze_civil(cv_json):
         title = i['title']
         logger.debug(title)
         comments = i['comments_count']
-        html += u"<h2>{0}) <a href='{1}' target='_blank'>{2}</a> – {3} comments</h2>\n<hr>\n".format(n+1, url, title, comments)
+        # Concatenate some HTML
+        html += u"\t<tr>\n"
+        html += u"\t\t<td align='center' valign='top' class='title'>{0}.</td>\n".format(n+1)
+        html += u"\t\t<td align='left' valign='top' class='title'><a href='{0}' target='_blank'>{1}</a> – {2} comments</td>\n".format(url, title, comments)
+        html += u"\t</tr>\n"
+    html += u"</table>"
     return html
 
 
-# In[12]:
+# In[133]:
 
 
 cv = get_civil()
@@ -162,7 +167,7 @@ except:
     logger.error("WRITE ERROR - Cannot write_file")
 
 
-# In[9]:
+# In[134]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")
