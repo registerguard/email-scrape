@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[126]:
+# In[135]:
 
 
 """
@@ -21,7 +21,7 @@ TODO
 import requests, json, boto3, os, sys, logging, logging.handlers
 
 
-# In[127]:
+# In[136]:
 
 
 """
@@ -40,7 +40,7 @@ else:
 #print(dev)
 
 
-# In[128]:
+# In[137]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ logger.debug("vvvvvvvvvvvvvvvvvv")
 #print('logging')
 
 
-# In[129]:
+# In[138]:
 
 
 """
@@ -105,7 +105,7 @@ def write_file(contents):
         s3.meta.client.upload_file('{0}/html/index.html'.format(here),'uploads.registerguard.com','email/civil/index.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
 
 
-# In[130]:
+# In[139]:
 
 
 def get_url(url):
@@ -113,7 +113,7 @@ def get_url(url):
     return url
 
 
-# In[131]:
+# In[140]:
 
 
 def get_civil():
@@ -132,7 +132,7 @@ def get_civil():
     return cv_json
 
 
-# In[132]:
+# In[141]:
 
 
 def analyze_civil(cv_json):
@@ -147,14 +147,14 @@ def analyze_civil(cv_json):
         comments = i['comments_count']
         # Concatenate some HTML
         html += u"\t<tr>\n"
-        html += u"\t\t<td align='center' valign='top' class='title'>{0}.</td>\n".format(n+1)
+        html += u"\t\t<td align='left' valign='top' class='title'>{0}.</td>\n".format(n+1)
         html += u"\t\t<td align='left' valign='top' class='title'><a href='{0}' target='_blank'>{1}</a> – {2} comments</td>\n".format(url, title, comments)
         html += u"\t</tr>\n"
     html += u"</table>"
     return html
 
 
-# In[133]:
+# In[142]:
 
 
 cv = get_civil()
@@ -167,7 +167,7 @@ except:
     logger.error("WRITE ERROR - Cannot write_file")
 
 
-# In[134]:
+# In[143]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")
