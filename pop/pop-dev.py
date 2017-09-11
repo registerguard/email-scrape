@@ -181,7 +181,7 @@ def id_stories(j):
     return stories
 
 
-# In[46]:
+# In[56]:
 
 
 """
@@ -214,7 +214,7 @@ def get_stories(section='local',area='Updates',publication='rg',items=None,callb
         r = requests.get(url, params = payload)
     except:
         stories = None
-        logger.error("REQUEST FAILED - {0}: {1}".format(url, payload))
+        logger.error(u"REQUEST FAILED - {0}: {1}".format(url, payload))
     if (len(r.text)):
         d = r.text
         j = json.loads(d)
@@ -239,7 +239,7 @@ dt.update(sports)
 
 
 
-# In[40]:
+# In[58]:
 
 
 def get_updates(d):
@@ -257,10 +257,10 @@ def get_updates(d):
     for i in u.keys():
         logger.debug("{0}: {1}".format(u[i], u[i]['timestamp']))
         if u[i]['timestamp'] < then:
-            logger.debug("old: {}".format(u[i]['headline']))
+            logger.debug(u"old: {}".format(u[i]['headline']))
             del(u[i])
         else:
-            logger.debug("new: {}".format(u[i]['headline']))
+            logger.debug(u"new: {}".format(u[i]['headline']))
     return u
 
 updates = get_updates(dt)
@@ -274,7 +274,7 @@ updates = get_updates(dt)
 #    print(updates[i]['timestamp'])"""
 
 
-# In[41]:
+# In[59]:
 
 
 logger.debug(len(updates))
@@ -352,7 +352,7 @@ def get_chartbeat():
     return most
 
 
-# In[47]:
+# In[60]:
 
 
 # Set cb to Chartbeat dictionary
@@ -366,7 +366,7 @@ logger.debug("cb set:\n{}".format(cb))
 
 
 
-# In[48]:
+# In[61]:
 
 
 #print(len(updates))
@@ -440,7 +440,7 @@ def get_datetime(pubdatetime):
     return pubdate, pubtime
 
 
-# In[49]:
+# In[62]:
 
 
 #DoSomething with the list
@@ -469,7 +469,7 @@ for n, p in enumerate(popular):
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[50]:
+# In[63]:
 
 
 logger.debug(html)
