@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[21]:
+# In[1]:
 
 
 """
@@ -25,15 +25,15 @@ TODO
 """
 
 
-# In[22]:
+# In[30]:
 
 
-from datetime import datetime
+from datetime import datetime, date
 import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers, copy
 pp = pprint.PrettyPrinter(indent=4)
 
 
-# In[23]:
+# In[3]:
 
 
 """
@@ -50,7 +50,7 @@ else:
     here = "/".join(here)
 
 
-# In[24]:
+# In[4]:
 
 
 # ----------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
 
 
-# In[25]:
+# In[5]:
 
 
 """
@@ -114,7 +114,7 @@ def get_secret(service, token='null'):
         return secret
 
 
-# In[26]:
+# In[6]:
 
 
 """
@@ -150,7 +150,7 @@ def write_file(contents):
 
 
 
-# In[27]:
+# In[7]:
 
 
 # Get clean datetime object from timestamp string
@@ -160,7 +160,7 @@ def clean_time(timestamp):
     return timestamp
 
 
-# In[28]:
+# In[8]:
 
 
 # Build dictionary of stories with CMS ID as key & dictionary of other data (like timestamp) as value
@@ -181,7 +181,7 @@ def id_stories(j):
     return stories
 
 
-# In[29]:
+# In[46]:
 
 
 """
@@ -224,7 +224,7 @@ def get_stories(section='local',area='Updates',publication='rg',items=None,callb
     return stories
 
 local = get_stories('local','Top Stories,Updates')
-sports = get_stories('sports','Top Updates')
+sports = get_stories('sports','Top Updates,Top Stories')
 
 # Create combined DT dictionary from stories out of the system
 dt = {}
@@ -239,7 +239,7 @@ dt.update(sports)
 
 
 
-# In[30]:
+# In[40]:
 
 
 def get_updates(d):
@@ -249,14 +249,18 @@ def get_updates(d):
     # Current datetime
     now = datetime.now()
     # Get datetime for 6 a.m. today
+    logger.debug('now.year: {}'.format(now.year))
+    logger.debug('now.month: {}'.format(now.month))
+    logger.debug('now.day: {}'.format(now.day))
     then = datetime(now.year, now.month, now.day, 6, 0, 0)
+    logger.debug("then: {}".format(then))
     for i in u.keys():
-        #print(u[i]['timestamp'])
+        logger.debug("{0}: {1}".format(u[i], u[i]['timestamp']))
         if u[i]['timestamp'] < then:
+            logger.debug("old: {}".format(u[i]['headline']))
             del(u[i])
-        #    print("fail")
-        #else:
-        #    print("SUCCESS")
+        else:
+            logger.debug("new: {}".format(u[i]['headline']))
     return u
 
 updates = get_updates(dt)
@@ -270,13 +274,13 @@ updates = get_updates(dt)
 #    print(updates[i]['timestamp'])"""
 
 
-# In[ ]:
+# In[41]:
 
 
+logger.debug(len(updates))
 
 
-
-# In[31]:
+# In[11]:
 
 
 # Get CMS ID from URL
@@ -290,7 +294,7 @@ def get_id(url):
     return cms_id
 
 
-# In[32]:
+# In[12]:
 
 
 # Get Chartbeat stories
@@ -323,7 +327,7 @@ def get_cb_stories(cb_json, count=20):
     return most
 
 
-# In[33]:
+# In[13]:
 
 
 # Go out to Chartbeat API and get most popular stories right now
@@ -348,7 +352,7 @@ def get_chartbeat():
     return most
 
 
-# In[34]:
+# In[47]:
 
 
 # Set cb to Chartbeat dictionary
@@ -362,19 +366,21 @@ logger.debug("cb set:\n{}".format(cb))
 
 
 
-# In[35]:
+# In[48]:
 
 
 #print(len(updates))
 #print(len(dt))
+
+# Test to see if there are a few updates
+# If fewer than 5 updates, then just pass all the dt stories to chartbeat
 if (len(updates) < 5):
     system_stories = dt
+# Otherwise, pass the updates to chartbeat
 else:
     system_stories = updates
 
-
-#pp.pprint(system_stories)    
-
+# Compare Chartbeat with stories from the system (either updates or all)
 def get_pop(c, s):
     pop = []
     for i in c:
@@ -398,7 +404,7 @@ logger.debug("popular set:\n{}".format(popular))
 
 
 
-# In[36]:
+# In[16]:
 
 
 # Need to add in some logic if there aren't enough stories!!!
@@ -410,23 +416,31 @@ logger.debug("popular set:\n{}".format(popular))
 
 
 
-# In[37]:
+# In[35]:
 
 
 # Create AP style time format
-def get_pubtime(pubtime):
+def get_datetime(pubdatetime):
+    # Deal with date
+    pubdate = date(pubdatetime.year, pubdatetime.month, pubdatetime.day)
+    if (pubdate == date.today()):
+        pubdate = "today"
+    else:
+        pubdate = pubdate.strftime('%b. %-d')
+    # Deal with time
     # See: https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior
-    pt = pubtime.strftime('%I:%M')
-    apm = pubtime.strftime('%p')
-    if (apm == "AM"):
-        apm = "a.m."
-    elif (apm == "PM"):
-        apm = "p.m."
-    pubtime = u"{0} {1}".format(pt, apm)
-    return pubtime
+    pubtime = pubdatetime.strftime('%I:%M')
+    # Deal with a.m./p.m.
+    ampm = pubdatetime.strftime('%p')
+    if (ampm == "AM"):
+        ampm = "a.m."
+    elif (ampm == "PM"):
+        ampm = "p.m."
+    pubtime = u"{0} {1}".format(pubtime, ampm)
+    return pubdate, pubtime
 
 
-# In[38]:
+# In[49]:
 
 
 #DoSomething with the list
@@ -435,9 +449,10 @@ html = u""
 for n, p in enumerate(popular):
     # Get clean data
     cat = p['category']
-    pubtime = get_pubtime(p['timestamp'])
+    pubdate, pubtime = get_datetime(p['timestamp'])
+    logger.debug("{0} {1}".format(pubdate, pubtime))
     url = p['url']
-    ymd = u"{0}{1}{2}".format(datetime.now().year,datetime.now().month,datetime.now().day)
+    ymd = date.today().strftime('%Y%m%d')
     head = p['headline']
     if (n == 0):
         #img = p['image-medium']
@@ -450,11 +465,11 @@ for n, p in enumerate(popular):
     # Do string concatenation (YUCK!)
     html += u"<h4>{}</h4>\n".format(cat)
     html += u"<h2><a href='{0}?utm_source=afternoon&utm_medium=email&utm_campaign=afternoon_{1}&utm_content=headline'>{2}</a></h2>".format(url,ymd,head)
-    html += u"<p class='italic'>Published today at {}</p>\n".format(pubtime)
+    html += u"<p class='italic'>Published {0} at {1}</p>\n".format(pubdate, pubtime)
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[39]:
+# In[50]:
 
 
 logger.debug(html)
@@ -466,7 +481,7 @@ except UnicodeEncodeError as err:
     logger.error(out)
 
 
-# In[40]:
+# In[20]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")
