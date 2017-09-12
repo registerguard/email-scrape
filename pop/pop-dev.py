@@ -33,7 +33,7 @@ import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers, co
 pp = pprint.PrettyPrinter(indent=4)
 
 
-# In[3]:
+# In[86]:
 
 
 """
@@ -181,7 +181,7 @@ def id_stories(j):
     return stories
 
 
-# In[72]:
+# In[79]:
 
 
 """
@@ -239,7 +239,7 @@ dt.update(sports)
 
 
 
-# In[73]:
+# In[80]:
 
 
 def get_updates(d):
@@ -352,7 +352,7 @@ def get_chartbeat():
     return most
 
 
-# In[74]:
+# In[81]:
 
 
 # Set cb to Chartbeat dictionary
@@ -366,7 +366,7 @@ logger.debug("cb set:\n{}".format(cb))
 
 
 
-# In[75]:
+# In[85]:
 
 
 #print(len(updates))
@@ -374,7 +374,7 @@ logger.debug("cb set:\n{}".format(cb))
 
 # Test to see if there are a few updates
 # If fewer than 5 updates, then just pass all the dt stories to chartbeat
-if (len(updates) < 50):
+if (len(updates) < 5):
     system_stories = dt
 # Otherwise, pass the updates to chartbeat
 else:
@@ -443,7 +443,7 @@ def get_datetime(pubdatetime):
     return pubdate, pubtime
 
 
-# In[76]:
+# In[83]:
 
 
 #DoSomething with the list
@@ -472,7 +472,7 @@ for n, p in enumerate(popular):
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[77]:
+# In[84]:
 
 
 logger.debug(html)
