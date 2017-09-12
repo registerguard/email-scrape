@@ -181,7 +181,7 @@ def id_stories(j):
     return stories
 
 
-# In[56]:
+# In[72]:
 
 
 """
@@ -239,7 +239,7 @@ dt.update(sports)
 
 
 
-# In[58]:
+# In[73]:
 
 
 def get_updates(d):
@@ -274,7 +274,7 @@ updates = get_updates(dt)
 #    print(updates[i]['timestamp'])"""
 
 
-# In[59]:
+# In[67]:
 
 
 logger.debug(len(updates))
@@ -352,7 +352,7 @@ def get_chartbeat():
     return most
 
 
-# In[60]:
+# In[74]:
 
 
 # Set cb to Chartbeat dictionary
@@ -366,7 +366,7 @@ logger.debug("cb set:\n{}".format(cb))
 
 
 
-# In[61]:
+# In[75]:
 
 
 #print(len(updates))
@@ -374,7 +374,7 @@ logger.debug("cb set:\n{}".format(cb))
 
 # Test to see if there are a few updates
 # If fewer than 5 updates, then just pass all the dt stories to chartbeat
-if (len(updates) < 5):
+if (len(updates) < 50):
     system_stories = dt
 # Otherwise, pass the updates to chartbeat
 else:
@@ -382,13 +382,16 @@ else:
 
 # Compare Chartbeat with stories from the system (either updates or all)
 def get_pop(c, s):
+    simple_test = []
     pop = []
     for i in c:
         if (i in s.keys()):
-            one = {}
-            one = s[i]
-            one['id'] = i
-            pop.append(one)
+            if (i not in simple_test):
+                one = {}
+                one = s[i]
+                one['id'] = i
+                simple_test.append(i)
+                pop.append(one)
     logger.debug("length: {}".format(len(pop)))
     return pop
 
@@ -440,7 +443,7 @@ def get_datetime(pubdatetime):
     return pubdate, pubtime
 
 
-# In[62]:
+# In[76]:
 
 
 #DoSomething with the list
@@ -469,7 +472,7 @@ for n, p in enumerate(popular):
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[63]:
+# In[77]:
 
 
 logger.debug(html)
