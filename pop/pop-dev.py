@@ -33,7 +33,7 @@ import boto3, requests, os, sys, json, pprint, re, logging, logging.handlers, co
 pp = pprint.PrettyPrinter(indent=4)
 
 
-# In[86]:
+# In[87]:
 
 
 """
@@ -181,7 +181,7 @@ def id_stories(j):
     return stories
 
 
-# In[79]:
+# In[88]:
 
 
 """
@@ -239,7 +239,7 @@ dt.update(sports)
 
 
 
-# In[80]:
+# In[89]:
 
 
 def get_updates(d):
@@ -274,7 +274,7 @@ updates = get_updates(dt)
 #    print(updates[i]['timestamp'])"""
 
 
-# In[67]:
+# In[90]:
 
 
 logger.debug(len(updates))
@@ -352,7 +352,7 @@ def get_chartbeat():
     return most
 
 
-# In[81]:
+# In[91]:
 
 
 # Set cb to Chartbeat dictionary
@@ -366,7 +366,7 @@ logger.debug("cb set:\n{}".format(cb))
 
 
 
-# In[85]:
+# In[92]:
 
 
 #print(len(updates))
@@ -443,7 +443,7 @@ def get_datetime(pubdatetime):
     return pubdate, pubtime
 
 
-# In[83]:
+# In[93]:
 
 
 #DoSomething with the list
@@ -472,7 +472,7 @@ for n, p in enumerate(popular):
     html += u"<hr style='clear:both'>\n\n"
 
 
-# In[84]:
+# In[94]:
 
 
 logger.debug(html)
