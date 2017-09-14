@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[125]:
+# In[1]:
 
 
 # This is a script to get recent stories from multiple DT sections and sort based on timestamp
@@ -9,7 +9,7 @@
 # 9/12/17
 
 
-# In[126]:
+# In[2]:
 
 
 from datetime import datetime, date
@@ -34,7 +34,7 @@ import boto3, requests, os, sys, json, re, logging, logging.handlers, copy
 
 
 
-# In[127]:
+# In[3]:
 
 
 # Set path & dev, will succeed if run on cron
@@ -47,7 +47,7 @@ except:
 #print(here, dev)
 
 
-# In[128]:
+# In[4]:
 
 
 # Logging
@@ -84,7 +84,7 @@ logger.addHandler(fileLogger)
 
 
 
-# In[129]:
+# In[5]:
 
 
 # Get clean datetime object from timestamp string
@@ -94,7 +94,7 @@ def clean_time(timestamp):
     return timestamp
 
 
-# In[130]:
+# In[6]:
 
 
 # Build dictionary of stories with CMS ID as key & dictionary of other data (like timestamp) as value
@@ -115,7 +115,7 @@ def id_stories(j):
     return stories
 
 
-# In[131]:
+# In[7]:
 
 
 """
@@ -177,7 +177,7 @@ def get_stories(section='local',area='Updates',publication='rg',items=None,callb
 
 
 
-# In[132]:
+# In[8]:
 
 
 # Filter for only stories from today
@@ -220,13 +220,16 @@ def get_updates(d):
 
 
 
-# In[133]:
+# In[20]:
 
 
 # Get sorted list
 def sort_updates(u):
     sort = []
-    for k,v in sorted(u.iteritems(), key=lambda (k,v): (v['timestamp'],k), reverse=True):
+    # Sort on timestamp
+    #for k,v in sorted(u.iteritems(), key=lambda (k,v): (v['timestamp'],k), reverse=True):
+    # Sort on popular
+    for k,v in sorted(u.iteritems(), key=lambda (k,v): (v['popular'],k), reverse=True):
         logger.debug("{0}: {1}".format(k,v['timestamp']))
         sort.append(k)
     return sort
@@ -250,7 +253,7 @@ def sort_updates(u):
 
 
 
-# In[134]:
+# In[10]:
 
 
 # Create AP style time format
@@ -274,7 +277,7 @@ def get_datetime(pubdatetime):
     return pubdate, pubtime
 
 
-# In[135]:
+# In[11]:
 
 
 # Create HTML for file
@@ -316,7 +319,7 @@ def create_html(sorted_list, updates_dict):
 
 
 
-# In[136]:
+# In[12]:
 
 
 """
@@ -364,7 +367,7 @@ def write_file(contents):
 
 
 
-# In[137]:
+# In[21]:
 
 
 logger.debug("------------------")
@@ -372,7 +375,7 @@ logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
 
 
-# In[138]:
+# In[22]:
 
 
 # Make request and sort stories into piles
@@ -381,7 +384,7 @@ sports = get_stories('sports','Top Updates,Top Stories')
 news = get_stories('news', 'Breaking')
 
 
-# In[139]:
+# In[23]:
 
 
 # Create combined dt dictionary from stories out of the system
@@ -392,20 +395,20 @@ dt.update(sports)
 #logger.debug("dt set:\n{}".format(dt))
 
 
-# In[140]:
+# In[24]:
 
 
 updates = get_updates(dt)
 logger.debug("len(updates): {}\n\n".format(len(updates)))
 
 
-# In[141]:
+# In[25]:
 
 
 sorted_updates = sort_updates(updates)
 
 
-# In[142]:
+# In[26]:
 
 
 my_html = create_html(sorted_updates, updates)
@@ -417,10 +420,16 @@ except UnicodeEncodeError as err:
     logger.error(out)
 
 
-# In[143]:
+# In[27]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")
 logger.debug(" - EXIT --- EXIT -")
 logger.debug("------------------")
+
+
+# In[ ]:
+
+
+
 
