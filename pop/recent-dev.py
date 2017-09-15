@@ -381,7 +381,7 @@ logger.debug("vvvvvvvvvvvvvvvvvv")
 # Make request and sort stories into piles
 local = get_stories('local','Breaking,Updates,Top Stories,Stories')
 sports = get_stories('sports','Top Updates,Top Stories')
-news = get_stories('news', 'Breaking')
+news = get_stories('news', 'Breaking,Top Updates')
 
 
 # In[23]:
