@@ -1,15 +1,16 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[57]:
 
 
 # This is a script to get recent stories from multiple DT sections and sort based on timestamp
 # Rob Denton/The Register-Guard
-# 9/12/17
+# Created: 9/12/17
+# Updated: 1/4/18 to add UTM to images, see: https://github.com/registerguard/tracker/issues/641
 
 
-# In[2]:
+# In[58]:
 
 
 from datetime import datetime, date
@@ -34,7 +35,7 @@ import boto3, requests, os, sys, json, re, logging, logging.handlers, copy
 
 
 
-# In[3]:
+# In[59]:
 
 
 # Set path & dev, will succeed if run on cron
@@ -47,7 +48,7 @@ except:
 #print(here, dev)
 
 
-# In[4]:
+# In[60]:
 
 
 # Logging
@@ -84,7 +85,7 @@ logger.addHandler(fileLogger)
 
 
 
-# In[5]:
+# In[61]:
 
 
 # Get clean datetime object from timestamp string
@@ -94,7 +95,7 @@ def clean_time(timestamp):
     return timestamp
 
 
-# In[6]:
+# In[62]:
 
 
 # Build dictionary of stories with CMS ID as key & dictionary of other data (like timestamp) as value
@@ -115,7 +116,7 @@ def id_stories(j):
     return stories
 
 
-# In[7]:
+# In[63]:
 
 
 """
@@ -177,7 +178,7 @@ def get_stories(section='local',area='Updates',publication='rg',items=None,callb
 
 
 
-# In[8]:
+# In[64]:
 
 
 # Filter for only stories from today
@@ -220,7 +221,7 @@ def get_updates(d):
 
 
 
-# In[20]:
+# In[65]:
 
 
 # Get sorted list
@@ -253,7 +254,7 @@ def sort_updates(u):
 
 
 
-# In[10]:
+# In[66]:
 
 
 # Create AP style time format
@@ -277,7 +278,7 @@ def get_datetime(pubdatetime):
     return pubdate, pubtime
 
 
-# In[11]:
+# In[67]:
 
 
 # Create HTML for file
@@ -293,7 +294,7 @@ def create_html(sorted_list, updates_dict):
         ymd = date.today().strftime('%Y%m%d')
         # Do HTML
         if len(img):
-            html += u"<div class='img'>\n<a href='{0}'><img src='{1}' alt='Story img'></a></div>".format(url,img)
+            html += u"<div class='img'>\n<a href='{0}?utm_source=afternoon&utm_medium=email&utm_campaign=afternoon_{1}&utm_content=image'><img src='{2}' alt='Story img'></a></div>".format(url,ymd,img)
         html += u"<h4>{}</h4>\n".format(cat)
         html += u"<h2><a href='{0}?utm_source=afternoon&utm_medium=email&utm_campaign=afternoon_{1}&utm_content=headline'>{2}</a></h2>".format(url,ymd,head)
         html += u"<p class='italic'>Published {0} at {1}</p>\n".format(pubdate, pubtime)
@@ -319,7 +320,7 @@ def create_html(sorted_list, updates_dict):
 
 
 
-# In[12]:
+# In[68]:
 
 
 """
@@ -367,7 +368,7 @@ def write_file(contents):
 
 
 
-# In[21]:
+# In[69]:
 
 
 logger.debug("------------------")
@@ -375,7 +376,7 @@ logger.debug(" - ENTER - ENTER -")
 logger.debug("vvvvvvvvvvvvvvvvvv")
 
 
-# In[22]:
+# In[70]:
 
 
 # Make request and sort stories into piles
@@ -384,7 +385,7 @@ sports = get_stories('sports','Top Updates,Top Stories')
 news = get_stories('news', 'Breaking,Top Updates')
 
 
-# In[23]:
+# In[71]:
 
 
 # Create combined dt dictionary from stories out of the system
@@ -395,20 +396,20 @@ dt.update(sports)
 #logger.debug("dt set:\n{}".format(dt))
 
 
-# In[24]:
+# In[72]:
 
 
 updates = get_updates(dt)
 logger.debug("len(updates): {}\n\n".format(len(updates)))
 
 
-# In[25]:
+# In[73]:
 
 
 sorted_updates = sort_updates(updates)
 
 
-# In[26]:
+# In[74]:
 
 
 my_html = create_html(sorted_updates, updates)
@@ -420,7 +421,7 @@ except UnicodeEncodeError as err:
     logger.error(out)
 
 
-# In[27]:
+# In[75]:
 
 
 logger.debug("^^^^^^^^^^^^^^^^^^")
